@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鸣潮矩阵阵容规划器</title>
+<style>
+/* ============ CSS Variables ============ */
+:root {
+  --bg-primary: #070b17;
+  --bg-secondary: #0d1425;
+  --bg-card: #131d35;
+  --bg-card-hover: #182342;
+  --bg-slot: #0a1120;
+  --border: #1a2744;
+  --border-light: #253658;
+  --text-primary: #e8ecf5;
+  --text-secondary: #8899b8;
+  --text-muted: #546480;
+  --accent-gold: #d4ad4a;
+  --accent-gold-dim: #9a8430;
+  --accent-teal: #4fc3f7;
+  --accent-danger: #ef5350;
+  --accent-success: #66bb6a;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+  --radius: 8px;
+  --radius-sm: 5px;
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============ Scrollbar ============ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-gold-dim); }
+
+/* ============ Header ============ */
+.header {
+  background: linear-gradient(135deg, #0c1322 0%, #140e2e 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-logo {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--accent-gold), #b89530);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #0c0f1a;
+  box-shadow: 0 0 20px rgba(212, 173, 74, 0.15);
+}
+
+.header-title h1 {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #e8dcb0, var(--accent-gold), #dbb94a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+
+.header-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.06);
+  min-width: 64px;
+}
+
+.stat-value {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  line-height: 1.3;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ============ Main Layout ============ */
+.main {
+  display: flex;
+  height: calc(100vh - 72px);
+  overflow: hidden;
+}
+
+/* ============ Left Panel - Roster ============ */
+.roster-panel {
+  width: 370px;
+  min-width: 300px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary);
+}
+
+.roster-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roster-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.roster-header-top h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.roster-header-top .char-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.04);
+  padding: 2px 10px;
+  border-radius: 10px;
+}
+
+.roster-batch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.batch-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border-light);
+  background: rgba(255,255,255,0.03);
+  color: var(--text-secondary);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.batch-btn:hover {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+  background: rgba(79,195,247,0.07);
+}
+
+.batch-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-left: 2px;
+}
+
+.roster-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+  gap: 8px;
+}
+
+/* ============ Character Card ============ */
+.char-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.char-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.char-card.selected {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 2px rgba(212, 173, 74, 0.25), var(--shadow-sm);
+  background: linear-gradient(135deg, var(--bg-card-hover), rgba(212, 173, 74, 0.06));
+}
+
+.char-card.not-owned {
+  opacity: 0.45;
+  filter: grayscale(0.3);
+}
+
+.char-card.exhausted {
+  opacity: 0.35;
+  pointer-events: none;
+  filter: grayscale(0.5);
+}
+
+.char-card.exhausted::after {
+  content: '已耗尽';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent-danger);
+  text-shadow: 0 0 12px rgba(239,83,80,0.5);
+  pointer-events: none;
+  letter-spacing: 2px;
+  background: rgba(7, 11, 23, 0.7);
+  padding: 2px 10px;
+  border-radius: 4px;
+}
+
+.char-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+
+.char-rarity {
+  font-size: 10px;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+  line-height: 1;
+}
+
+.rarity-5 { color: var(--accent-gold); }
+.rarity-4 { color: #8b80a8; }
+
+.char-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: auto;
+}
+
+.owned-toggle {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 2px 0;
+}
+
+.owned-toggle input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid var(--border-light);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.owned-toggle input[type="checkbox"]:checked {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 6px rgba(212, 173, 74, 0.3);
+}
+
+.owned-toggle input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 9px;
+  font-weight: bold;
+  color: #0c0f1a;
+}
+
+.usage-toggle-btn {
+  padding: 2px 7px;
+  border: 1px solid var(--border-light);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  transition: var(--transition);
+  white-space: nowrap;
+  min-width: 34px;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.usage-toggle-btn:hover {
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+  background: rgba(79,195,247,0.08);
+  transform: scale(1.05);
+}
+
+.usage-toggle-btn.usage-low {
+  border-color: #c8953c;
+  color: #f0b84c;
+}
+
+.usage-toggle-btn.usage-empty {
+  border-color: rgba(239,83,80,0.4);
+  color: var(--accent-danger);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.protagonist-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 3px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background: rgba(255,255,255,0.03);
+  color: var(--text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.protagonist-switch:hover {
+  border-color: var(--accent-gold-dim);
+  color: var(--accent-gold);
+  background: rgba(212, 173, 74, 0.07);
+}
+
+.protagonist-elem-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ============ Right Panel - Teams ============ */
+.team-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+  overflow-y: auto;
+  background: var(--bg-primary);
+}
+
+.team-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.team-panel-header h2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.team-panel-header .hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.team-panel-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-team-add {
+  padding: 7px 16px;
+  border: 1px solid var(--accent-gold);
+  background: rgba(212, 173, 74, 0.1);
+  color: var(--accent-gold);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-team-add:hover {
+  background: rgba(212, 173, 74, 0.2);
+  box-shadow: 0 0 16px rgba(212, 173, 74, 0.15);
+  transform: translateY(-1px);
+}
+
+.btn-remove-team {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: rgba(239,83,80,0.12);
+  color: var(--accent-danger);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  opacity: 0.5;
+}
+
+.btn-remove-team:hover {
+  opacity: 1;
+  background: rgba(239,83,80,0.25);
+  transform: scale(1.1);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  flex: 1;
+  align-content: start;
+}
+
+.team-box {
+  background: linear-gradient(135deg, #0f1628 0%, #11192e 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  transition: var(--transition);
+}
+
+.team-box:hover {
+  border-color: var(--border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.team-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-gold);
+  letter-spacing: 0.3px;
+}
+
+.team-count-badge {
+  font-size: 10px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(212, 173, 74, 0.08);
+  color: var(--accent-gold);
+  border: 1px solid rgba(212, 173, 74, 0.15);
+}
+
+.team-slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
+/* ============ Team Slot ============ */
+.team-slot {
+  background: var(--bg-slot);
+  border: 1px dashed rgba(37, 54, 88, 0.6);
+  border-radius: 6px;
+  padding: 5px 6px;
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  gap: 3px;
+}
+
+.team-slot:hover {
+  border-color: rgba(212, 173, 74, 0.3);
+  background: rgba(212, 173, 74, 0.03);
+}
+
+.team-slot.filled {
+  border-style: solid;
+  border-color: rgba(255,255,255,0.06);
+  background: rgba(19, 29, 53, 0.6);
+}
+
+.team-slot.filled:hover {
+  border-color: var(--accent-danger);
+  background: rgba(239,83,80,0.04);
+}
+
+.team-slot.slot-selected {
+  border-color: var(--accent-teal) !important;
+  border-style: solid !important;
+  background: rgba(79,195,247,0.06) !important;
+  box-shadow: 0 0 0 2px rgba(79,195,247,0.15), 0 0 12px rgba(79,195,247,0.06);
+}
+
+.slot-role {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+}
+
+.slot-character-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.slot-empty-text {
+  font-size: 10px;
+  color: rgba(84, 100, 128, 0.6);
+  text-align: center;
+}
+
+.slot-remove-hint {
+  font-size: 8px;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.team-slot.filled:hover .slot-remove-hint {
+  opacity: 1;
+  color: var(--accent-danger);
+}
+
+/* ============ Custom Character Button ============ */
+.add-custom-area {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-add-custom {
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px dashed rgba(37, 54, 88, 0.5);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-add-custom:hover {
+  border-color: var(--accent-gold-dim);
+  color: var(--accent-gold);
+  background: rgba(212, 173, 74, 0.04);
+}
+
+/* ============ Modal ============ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(6px);
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: linear-gradient(135deg, #111a2e, #0f1628);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  width: 380px;
+  max-width: 90vw;
+  box-shadow: var(--shadow-lg);
+  animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal h3 {
+  font-size: 17px;
+  margin-bottom: 18px;
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 3px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 2px rgba(212, 173, 74, 0.1);
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.form-group select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.btn {
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-gold), #c8a030);
+  color: #0c0f1a;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(212, 173, 74, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.03);
+}
+
+/* ============ Toast ============ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(19, 29, 53, 0.95);
+  border: 1px solid var(--border-light);
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============ Reset Data Button ============ */
+.btn-reset {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid rgba(239,83,80,0.2);
+  color: rgba(239,83,80,0.6);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: var(--transition);
+  font-weight: 500;
+}
+
+.btn-reset:hover {
+  background: rgba(239,83,80,0.08);
+  border-color: var(--accent-danger);
+  color: var(--accent-danger);
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 900px) {
+  .main {
+    flex-direction: column;
+    height: auto;
+  }
+  .roster-panel {
+    width: 100%;
+    min-width: 0;
+    max-height: 42vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header-stats {
+    width: 100%;
+    justify-content: space-around;
+  }
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .roster-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  .team-slots {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+  .team-slot {
+    min-height: 44px;
+    flex-direction: row;
+    padding: 6px 10px;
+    justify-content: space-between;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">鸣</div>
+    <div class="header-title">
+      <h1>矩阵叠兵 · 阵容搭配工具</h1>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-item">
+      <span class="stat-value" id="statOwned">0</span>
+      <span class="stat-label">已拥有</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value" id="statTeams">0/4</span>
+      <span class="stat-label">队伍数</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value" id="statCharsUsed">0</span>
+      <span class="stat-label">已使用角色</span>
+    </div>
+    <button class="btn-reset" onclick="resetAllData()" type="button" title="重置所有数据">重置数据</button>
+  </div>
+</header>
+
+<!-- ============ MAIN ============ -->
+<div class="main">
+
+  <!-- Left: Character Roster -->
+  <div class="roster-panel">
+    <div class="roster-header">
+      <div class="roster-header-top">
+        <h2>角色池</h2>
+        <span class="char-count" id="charCountDisplay">51 位角色</span>
+      </div>
+      <div class="roster-batch">
+        <button class="batch-btn" onclick="batchSelectAll()" type="button">✅ 全选拥有</button>
+        <button class="batch-btn" onclick="batchDeselectAll()" type="button">❌ 取消全选</button>
+        <span class="batch-hint">勾选"拥有"的角色高亮 · 未拥有的角色灰显</span>
+      </div>
+    </div>
+    <div class="roster-scroll">
+      <div class="roster-grid" id="rosterGrid"></div>
+    </div>
+  </div>
+
+  <!-- Right: Team Building -->
+  <div class="team-panel">
+    <div class="team-panel-header">
+      <div>
+        <h2>队伍编排</h2>
+        <div class="hint">点击左侧角色自动填入空位 · 点击已放置角色移除 · 次数按钮可切换1次/2次</div>
+      </div>
+      <div class="team-panel-actions">
+        <button class="btn-team-add" onclick="addTeam()" type="button">+ 添加队伍</button>
+      </div>
+    </div>
+    <div class="team-grid" id="teamGrid"></div>
+    <div class="add-custom-area">
+      <button class="btn-add-custom" onclick="openCustomModal()" type="button">+ 添加自定义角色</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-overlay" id="customModal">
+  <div class="modal">
+    <h3>添加自定义角色</h3>
+    <div class="form-group">
+      <label>角色名称</label>
+      <input type="text" id="customName" placeholder="输入角色名称" maxlength="20">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>稀有度</label>
+        <select id="customRarity">
+          <option value="5">★5</option>
+          <option value="4">★4</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>可用次数</label>
+        <select id="customUses">
+          <option value="1">1 次</option>
+          <option value="2">2 次</option>
+          <option value="3">3 次</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeCustomModal()" type="button">取消</button>
+      <button class="btn btn-primary" onclick="addCustomCharacter()" type="button">确认添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==========================================================
+   鸣潮矩阵阵容规划器
+   所有数据均为硬编码，无外部依赖。
+   ========================================================== */
+
+// ============ ELEMENT MAPPINGS ============
+const ELEMENT_LABELS = {
+  Spectro: '衍射',
+  Aero: '气动',
+  Glacio: '冷凝',
+  Electro: '导电',
+  Fusion: '热熔',
+  Havoc: '湮灭'
+};
+
+const ELEMENT_COLORS = {
+  Spectro: '#F5C842',
+  Aero: '#4FC3F7',
+  Glacio: '#81D4FA',
+  Electro: '#CE93D8',
+  Fusion: '#EF5350',
+  Havoc: '#7E57C2'
+};
+
+const ELEMENT_ORDER = ['Spectro', 'Aero', 'Glacio', 'Electro', 'Fusion', 'Havoc'];
+
+// ============ CHARACTER DATABASE ============
+const BUILTIN_CHARACTERS = [
+  // ===== 1.0 开服 =====
+  // 5★ 常驻
+  { id: 'zhujiao',       name: '漂泊者',        element: 'Spectro',  rarity: 5, maxUses: 1 },
+  { id: 'weilinai',      name: '维里奈',        element: 'Spectro',  rarity: 5, maxUses: 2 },
+  { id: 'anke',          name: '安可',          element: 'Fusion',   rarity: 5, maxUses: 1 },
+  { id: 'kakaluo',       name: '卡卡罗',        element: 'Electro',  rarity: 5, maxUses: 1 },
+  { id: 'lingyang',      name: '凌阳',          element: 'Glacio',   rarity: 5, maxUses: 1 },
+  { id: 'jianxin',       name: '鉴心',          element: 'Aero',     rarity: 5, maxUses: 1 },
+  { id: 'jiyan',         name: '忌炎',          element: 'Aero',     rarity: 5, maxUses: 1 },
+  // 4★
+  { id: 'yangyang',      name: '秧秧',          element: 'Aero',     rarity: 4, maxUses: 1 },
+  { id: 'chixia',        name: '炽霞',          element: 'Fusion',   rarity: 4, maxUses: 1 },
+  { id: 'baizhi',        name: '白芷',          element: 'Glacio',   rarity: 4, maxUses: 2 },
+  { id: 'sanhua',        name: '散华',          element: 'Glacio',   rarity: 4, maxUses: 1 },
+  { id: 'taoqi',         name: '桃祈',          element: 'Havoc',    rarity: 4, maxUses: 1 },
+  { id: 'danjin',        name: '丹瑾',          element: 'Havoc',    rarity: 4, maxUses: 1 },
+  { id: 'qiushui',       name: '秋水',          element: 'Aero',     rarity: 4, maxUses: 1 },
+  { id: 'motefei',       name: '莫特斐',        element: 'Fusion',   rarity: 4, maxUses: 1 },
+  { id: 'yuanwu',        name: '渊武',          element: 'Electro',  rarity: 4, maxUses: 1 },
+  // 1.0 活动限定
+  { id: 'yinyin',        name: '吟霖',          element: 'Electro',  rarity: 5, maxUses: 1 },
+
+  // ===== 1.1 =====
+  { id: 'jinxi',         name: '今汐',          element: 'Spectro',  rarity: 5, maxUses: 1 },
+  { id: 'changli',       name: '长离',          element: 'Fusion',   rarity: 5, maxUses: 1 },
+
+  // ===== 1.2 =====
+  { id: 'zhezhi',        name: '折枝',          element: 'Glacio',   rarity: 5, maxUses: 1 },
+  { id: 'xiangliyao',    name: '相里要',        element: 'Electro',  rarity: 5, maxUses: 1 },
+  { id: 'youhu',         name: '釉瑚',          element: 'Glacio',   rarity: 4, maxUses: 1 },
+
+  // ===== 1.3 =====
+  { id: 'shouanren',     name: '守岸人',        element: 'Spectro',  rarity: 5, maxUses: 2 },
+
+  // ===== 1.4 =====
+  { id: 'chun',          name: '椿',            element: 'Havoc',    rarity: 5, maxUses: 1 },
+  { id: 'dengdeng',      name: '灯灯',          element: 'Aero',     rarity: 4, maxUses: 1 },
+
+  // ===== 2.0 =====
+  { id: 'kelaita',       name: '珂莱塔',        element: 'Glacio',   rarity: 5, maxUses: 1 },
+  { id: 'luokeke',       name: '洛可可',        element: 'Havoc',    rarity: 5, maxUses: 1 },
+
+  // ===== 2.1 =====
+  { id: 'feibi',         name: '菲比',          element: 'Spectro',  rarity: 5, maxUses: 1 },
+  { id: 'bulante',       name: '布兰特',        element: 'Fusion',   rarity: 5, maxUses: 1 },
+  { id: 'buling',        name: '卜灵',          element: 'Spectro',  rarity: 4, maxUses: 2 },
+
+  // ===== 2.2 =====
+  { id: 'kanteleila',    name: '坎特蕾拉',      element: 'Havoc',    rarity: 5, maxUses: 1 },
+  { id: 'zanni',         name: '赞妮',          element: 'Spectro',  rarity: 5, maxUses: 1 },
+
+  // ===== 2.3 =====
+  { id: 'xiakong',       name: '夏空',          element: 'Aero',     rarity: 5, maxUses: 1 },
+  { id: 'katixiya',      name: '卡提希娅',      element: 'Aero',     rarity: 5, maxUses: 1 },
+
+  // ===== 2.4 =====
+  { id: 'lupa',          name: '露帕',          element: 'Fusion',   rarity: 5, maxUses: 1 },
+  { id: 'fuluoluo',      name: '弗洛洛',        element: 'Havoc',    rarity: 5, maxUses: 1 },
+
+  // ===== 2.5 =====
+  { id: 'aogusita',      name: '奥古斯塔',      element: 'Spectro',  rarity: 5, maxUses: 1 },
+  { id: 'younuo',        name: '尤诺',          element: 'Glacio',   rarity: 5, maxUses: 1 },
+
+  // ===== 2.6 =====
+  { id: 'jiabeilina',    name: '嘉贝莉娜',      element: 'Fusion',   rarity: 5, maxUses: 1 },
+  { id: 'qiuyuan',       name: '仇远',          element: 'Fusion',   rarity: 5, maxUses: 1 },
+
+  // ===== 2.7 =====
+  { id: 'qianxiao',      name: '千咲',          element: 'Aero',     rarity: 5, maxUses: 1 },
+
+  // ===== 3.0 =====
+  { id: 'linnai',        name: '琳奈',          element: 'Glacio',   rarity: 5, maxUses: 1 },
+  { id: 'moning',        name: '莫宁',          element: 'Spectro',  rarity: 5, maxUses: 2 },
+
+  // ===== 3.1 =====
+  { id: 'luhesi',        name: '陆·赫斯',       element: 'Havoc',    rarity: 5, maxUses: 1 },
+  { id: 'aimisi',        name: '爱弥斯',        element: 'Havoc',    rarity: 5, maxUses: 1 },
+
+  // ===== 3.2 =====
+  { id: 'xigelika',      name: '西格莉卡',      element: 'Aero',     rarity: 5, maxUses: 1 },
+
+  // ===== 3.3 =====
+  { id: 'feixue',        name: '绯雪',          element: 'Glacio',   rarity: 5, maxUses: 1 },
+  { id: 'daniya',        name: '达妮娅',        element: 'Electro',  rarity: 5, maxUses: 1 },
+
+  // ===== 3.4 =====
+  { id: 'luxi',          name: '露西',          element: 'Spectro',  rarity: 5, maxUses: 1 },
+  { id: 'libeika',       name: '丽贝卡',        element: 'Electro',  rarity: 5, maxUses: 1 },
+  { id: 'luosela',       name: '洛瑟菈',        element: 'Glacio',   rarity: 5, maxUses: 1 },
+
+  // ===== 后续 =====
+  { id: 'yangyangxuanling', name: '秧秧玄翎',    element: 'Aero',     rarity: 5, maxUses: 1 },
+  { id: 'suisui',        name: '穗穗',          element: 'Spectro',  rarity: 5, maxUses: 1 },
+  { id: 'jingran',       name: '景燃',          element: 'Fusion',   rarity: 5, maxUses: 1 },
+  { id: 'suoming',       name: '锁瞑',          element: 'Havoc',    rarity: 5, maxUses: 1 },
+  { id: 'qingxiao',      name: '清霄',          element: 'Aero',     rarity: 5, maxUses: 1 },
+  { id: 'xin',           name: '心',            element: 'Spectro',  rarity: 5, maxUses: 1 }
+];
+
+// ============ STATE ============
+/*
+  state shape:
+  {
+    owned: { [charId]: true, ... },
+    teams: [
+      [charId|null, charId|null, charId|null],  // team 0: 主C, 副C, 生存
+      [null, null, null],                       // team 1
+      [null, null, null],                       // team 2
+      [null, null, null]                        // team 3
+    ],
+    customChars: [ { id, name, element, rarity, maxUses }, ... ]
+  }
+*/
+const STORAGE_KEY = 'mc_matrix_team_builder_v34';
+const ROLE_LABELS = ['主C', '副C', '生存/辅助'];
+const PROTAGONIST_ELEMENTS = ['Spectro', 'Havoc', 'Aero', 'Electro'];
+const PROTAGONIST_ELEM_NAMES = { Spectro: '衍射', Havoc: '湮灭', Aero: '气动', Electro: '导电' };
+const PROTAGONIST_ELEM_COLORS = { Spectro: '#F5C842', Havoc: '#7E57C2', Aero: '#4FC3F7', Electro: '#CE93D8' };
+
+function getTeamName(index) {
+  const names = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  if (index < names.length) return '队伍' + names[index];
+  return '队伍 ' + (index + 1);
+}
+
+let state = null;
+
+// ============ State Management ============
+function getDefaultState() {
+  return {
+    owned: {},
+    protagonistElement: 'Spectro',
+    teams: [
+      [null, null, null],
+      [null, null, null],
+      [null, null, null]
+    ],
+    customChars: [],
+    selectedSlot: null,
+    maxUsesOverrides: {}
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Clean up old protagonist IDs that no longer exist
+      const oldProtagonistIds = ['piaobozhe', 'zhujiaospectro', 'zhujiaohavoc', 'zhujiaoaero', 'zhujiaoelectro'];
+      oldProtagonistIds.forEach(id => {
+        delete parsed.owned[id];
+      });
+      // Remove old protagonist IDs from teams
+      if (parsed.teams) {
+        for (let ti = 0; ti < parsed.teams.length; ti++) {
+          for (let si = 0; si < parsed.teams[ti].length; si++) {
+            if (oldProtagonistIds.includes(parsed.teams[ti][si])) {
+              parsed.teams[ti][si] = null;
+            }
+          }
+        }
+      }
+      // Ensure each team has 3 slots
+      parsed.teams.forEach((t, i) => {
+        while (parsed.teams[i].length < 3) parsed.teams[i].push(null);
+      });
+      if (!parsed.protagonistElement) parsed.protagonistElement = 'Spectro';
+      if (!parsed.maxUsesOverrides) parsed.maxUsesOverrides = {};
+      if (!parsed.selectedSlot) parsed.selectedSlot = null;
+      state = parsed;
+      return;
+    }
+  } catch (e) { /* ignore */ }
+  state = getDefaultState();
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) { /* ignore */ }
+}
+
+// ============ Derived Data ============
+function getAllCharacters() {
+  return [...BUILTIN_CHARACTERS, ...state.customChars];
+}
+
+function getCharacter(id) {
+  return getAllCharacters().find(c => c.id === id);
+}
+
+/** Count how many times a character is used across all teams */
+function getUsageCount(charId) {
+  let count = 0;
+  for (const team of state.teams) {
+    for (const slot of team) {
+      if (slot === charId) count++;
+    }
+  }
+  return count;
+}
+
+function getEffectiveMaxUses(charId) {
+  if (state.maxUsesOverrides[charId] != null) return state.maxUsesOverrides[charId];
+  const char = getCharacter(charId);
+  return char ? char.maxUses : 1;
+}
+
+function getRemainingUses(charId) {
+  return getEffectiveMaxUses(charId) - getUsageCount(charId);
+}
+
+function isExhausted(charId) {
+  return getRemainingUses(charId) <= 0 && getUsageCount(charId) > 0;
+}
+
+// ============ RENDER ============
+function renderAll() {
+  renderRoster();
+  renderTeams();
+  renderStats();
+  saveState();
+}
+
+function renderRoster() {
+  const grid = document.getElementById('rosterGrid');
+  const allChars = getAllCharacters();
+  const ownedCount = allChars.filter(c => state.owned[c.id]).length;
+  document.getElementById('charCountDisplay').textContent = `${allChars.length} 位角色 · 拥有 ${ownedCount}`;
+
+  // Sort: 4★ → 5★, then by release order, without moving owned to top
+  const orderMap = {};
+  allChars.forEach((c, i) => { orderMap[c.id] = i; });
+  let sorted = [...allChars].sort((a, b) => {
+    // 4★ before 5★
+    if (a.rarity !== b.rarity) return a.rarity - b.rarity;
+    return (orderMap[a.id] || 0) - (orderMap[b.id] || 0);
+  });
+
+  grid.innerHTML = '';
+  for (const char of sorted) {
+    const card = document.createElement('div');
+    const isOwned = !!state.owned[char.id];
+    const effectiveMax = getEffectiveMaxUses(char.id);
+    const remaining = isOwned ? getRemainingUses(char.id) : effectiveMax;
+    const exhausted = isOwned && isExhausted(char.id);
+    const usageCount = isOwned ? getUsageCount(char.id) : 0;
+    const isSelected = state.selectedId === char.id;
+    const isProtagonist = char.id === 'zhujiao';
+
+    // Usage badge class
+    let usageClass = 'usage-ok';
+    if (isOwned) {
+      if (remaining <= 0 && usageCount > 0) usageClass = 'usage-empty';
+      else if (remaining <= 1 && effectiveMax > 1) usageClass = 'usage-low';
+    }
+
+    card.className = 'char-card';
+    if (isSelected) card.classList.add('selected');
+    if (!isOwned) card.classList.add('not-owned');
+    if (exhausted) card.classList.add('exhausted');
+
+    const displayName = isProtagonist
+      ? '漂泊者·' + PROTAGONIST_ELEM_NAMES[state.protagonistElement]
+      : char.name;
+
+    card.innerHTML = `
+      <div class="char-name" title="${char.name}">${displayName}</div>
+      <div class="char-rarity ${char.rarity === 5 ? 'rarity-5' : 'rarity-4'}">
+        ${'★'.repeat(char.rarity)}
+      </div>
+      <div class="char-card-actions">
+        <label class="owned-toggle" onclick="event.stopPropagation()">
+          <input type="checkbox" ${isOwned ? 'checked' : ''} onchange="toggleOwned('${char.id}', this.checked)">
+          拥有
+        </label>
+        ${isOwned ? `
+          <button class="usage-toggle-btn ${usageClass}" onclick="event.stopPropagation(); cycleUsage('${char.id}')">
+            ${remaining}/${effectiveMax}
+          </button>
+        ` : ''}
+      </div>
+      ${isProtagonist ? `
+        <div class="protagonist-switch" onclick="event.stopPropagation(); cycleProtagonistElement()">
+          <span class="protagonist-elem-dot" style="background:${PROTAGONIST_ELEM_COLORS[state.protagonistElement]}"></span>
+          切换属性
+        </div>
+      ` : ''}
+    `;
+
+    // Click character → auto-fill into first empty slot
+    card.addEventListener('click', () => {
+      if (exhausted) return;
+      if (!isOwned) {
+        showToast('请先勾选"拥有"以启用该角色');
+        return;
+      }
+
+      if (getRemainingUses(char.id) <= 0) {
+        showToast('该角色可用次数已耗尽');
+        return;
+      }
+
+      // Find first empty slot across all teams
+      let placed = false;
+      for (let ti = 0; ti < state.teams.length; ti++) {
+        for (let si = 0; si < state.teams[ti].length; si++) {
+          if (state.teams[ti][si] === null) {
+            // Check if character is already in another slot of same team
+            const alreadyInTeam = state.teams[ti].some(c => c === char.id);
+            if (alreadyInTeam) continue;
+            // Place here
+            state.teams[ti][si] = char.id;
+            placed = true;
+            state.selectedSlot = null;
+            state.selectedId = null;
+            renderAll();
+            showToast(`已将 ${char.name} 放入 ${getTeamName(ti)}`);
+            break;
+          }
+        }
+        if (placed) break;
+      }
+
+      if (!placed) {
+        showToast('所有队伍槽位已满或当前角色已在该队伍中');
+      }
+    });
+
+    grid.appendChild(card);
+  }
+}
+
+function renderTeams() {
+  const container = document.getElementById('teamGrid');
+  container.innerHTML = '';
+
+  for (let ti = 0; ti < state.teams.length; ti++) {
+    const team = state.teams[ti];
+    const box = document.createElement('div');
+    box.className = 'team-box';
+
+    const filledCount = team.filter(s => s !== null).length;
+
+    box.innerHTML = `
+      <div class="team-header">
+        <span class="team-label">${getTeamName(ti)}</span>
+        <span class="team-count-badge">${filledCount}/3</span>
+        <button class="btn-remove-team" onclick="removeTeam(${ti})" title="删除此队伍">✕</button>
+      </div>
+      <div class="team-slots">
+        ${team.map((charId, si) => {
+          const role = ROLE_LABELS[si];
+          const isSlotSelected = state.selectedSlot && state.selectedSlot.team === ti && state.selectedSlot.slot === si;
+          if (charId) {
+            const char = getCharacter(charId);
+            if (!char) {
+              // Character might have been removed (custom char deleted)
+              state.teams[ti][si] = null;
+              saveState();
+              return '';
+            }
+            return `
+              <div class="team-slot filled ${isSlotSelected ? 'slot-selected' : ''}" data-team="${ti}" data-slot="${si}">
+                <div class="slot-role">${role}</div>
+                <div class="slot-character-name">${char.name}</div>
+                <div class="slot-remove-hint">点击移除</div>
+              </div>
+            `;
+          } else {
+            return `
+              <div class="team-slot ${isSlotSelected ? 'slot-selected' : ''}" data-team="${ti}" data-slot="${si}">
+                <div class="slot-role">${role}</div>
+                <div class="slot-empty-text">${isSlotSelected ? '已选中，点击角色自动填入' : '空位'}</div>
+              </div>
+            `;
+          }
+        }).join('')}
+      </div>
+    `;
+
+    // Event delegation for slot clicks
+    box.querySelectorAll('.team-slot').forEach(el => {
+      el.addEventListener('click', () => {
+        const ti2 = parseInt(el.dataset.team);
+        const si2 = parseInt(el.dataset.slot);
+        const currentCharId = state.teams[ti2][si2];
+
+        if (currentCharId) {
+          // Remove character from slot
+          state.teams[ti2][si2] = null;
+          state.selectedId = null;
+          state.selectedSlot = null;
+          renderAll();
+          showToast(`已移除 ${getCharacter(currentCharId)?.name || ''}`);
+        } else {
+          // Toggle slot selection
+          if (state.selectedSlot && state.selectedSlot.team === ti2 && state.selectedSlot.slot === si2) {
+            state.selectedSlot = null;
+          } else {
+            state.selectedSlot = { team: ti2, slot: si2 };
+          }
+          state.selectedId = null;
+          renderAll();
+        }
+      });
+    });
+
+    container.appendChild(box);
+  }
+}
+
+function renderStats() {
+  const allChars = getAllCharacters();
+  const ownedCount = allChars.filter(c => state.owned[c.id]).length;
+  const totalTeamsCount = state.teams.filter(t => t.some(s => s !== null)).length;
+  const totalCharsUsed = state.teams.flat().filter(c => c !== null).length;
+
+  document.getElementById('statOwned').textContent = ownedCount;
+  document.getElementById('statTeams').textContent = `${totalTeamsCount}/${state.teams.length}`;
+  document.getElementById('statCharsUsed').textContent = totalCharsUsed;
+}
+
+// ============ TEAM MANAGEMENT ============
+function addTeam() {
+  state.teams.push([null, null, null]);
+  renderAll();
+  showToast(`已添加 ${getTeamName(state.teams.length - 1)}`);
+}
+
+function removeTeam(index) {
+  if (state.teams.length <= 1) {
+    showToast('至少保留一个队伍');
+    return;
+  }
+  // Check if team has characters
+  const hasChars = state.teams[index].some(s => s !== null);
+  if (hasChars && !confirm(`确定要删除${getTeamName(index)}吗？该队伍中的角色将被释放。`)) return;
+
+  state.teams.splice(index, 1);
+  state.selectedId = null;
+  state.selectedSlot = null;
+  renderAll();
+  showToast(`已删除队伍`);
+}
+
+// ============ PROTAGONIST ============
+function cycleProtagonistElement() {
+  const current = PROTAGONIST_ELEMENTS.indexOf(state.protagonistElement);
+  const next = (current + 1) % PROTAGONIST_ELEMENTS.length;
+  state.protagonistElement = PROTAGONIST_ELEMENTS[next];
+  renderAll();
+  showToast('漂泊者属性切换为：' + PROTAGONIST_ELEM_NAMES[state.protagonistElement]);
+}
+
+// ============ USAGE TOGGLE ============
+function cycleUsage(charId) {
+  const current = getEffectiveMaxUses(charId);
+  const newVal = current === 1 ? 2 : 1;
+  state.maxUsesOverrides[charId] = newVal;
+  renderAll();
+  showToast(getCharacter(charId)?.name + ' 可用次数设为 ' + newVal + ' 次');
+}
+
+// ============ INTERACTIONS ============
+function toggleOwned(charId, owned) {
+  state.owned[charId] = owned;
+  if (!owned) {
+    // Remove character from all teams
+    for (let ti = 0; ti < state.teams.length; ti++) {
+      for (let si = 0; si < state.teams[ti].length; si++) {
+        if (state.teams[ti][si] === charId) {
+          state.teams[ti][si] = null;
+        }
+      }
+    }
+    if (state.selectedId === charId) {
+      state.selectedId = null;
+    }
+  }
+  renderAll();
+}
+
+// ============ BATCH SELECT ============
+function batchSelectAll() {
+  const allChars = getAllCharacters();
+  for (const c of allChars) {
+    state.owned[c.id] = true;
+  }
+  renderAll();
+  showToast(`已全选 ${allChars.length} 位角色，请取消勾选你没有的角色`);
+}
+
+function batchDeselectAll() {
+  const allChars = getAllCharacters();
+  // Remove all from teams too
+  for (let ti = 0; ti < state.teams.length; ti++) {
+    for (let si = 0; si < state.teams[ti].length; si++) {
+      state.teams[ti][si] = null;
+    }
+  }
+  for (const c of allChars) {
+    state.owned[c.id] = false;
+  }
+  state.selectedId = null;
+  renderAll();
+  showToast('已取消所有角色的拥有状态');
+}
+
+// ============ CUSTOM CHARACTERS ============
+function openCustomModal() {
+  document.getElementById('customModal').classList.add('open');
+  document.getElementById('customName').value = '';
+  document.getElementById('customName').focus();
+}
+
+function closeCustomModal() {
+  document.getElementById('customModal').classList.remove('open');
+}
+
+function addCustomCharacter() {
+  const name = document.getElementById('customName').value.trim();
+  if (!name) {
+    showToast('请输入角色名称');
+    return;
+  }
+  const rarity = parseInt(document.getElementById('customRarity').value);
+  const maxUses = parseInt(document.getElementById('customUses').value);
+
+  // Generate a unique id
+  const id = 'custom_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+
+  const newChar = { id, name, element: 'Spectro', rarity, maxUses };
+  state.customChars.push(newChar);
+  // Auto-owned
+  state.owned[id] = true;
+
+  closeCustomModal();
+  renderAll();
+  showToast(`已添加自定义角色: ${name}`);
+}
+
+// ============ RESET ============
+function resetAllData() {
+  if (!confirm('确定要重置所有数据吗？这将清除所有角色拥有状态、队伍配置和自定义角色。')) return;
+  state = getDefaultState();
+  renderAll();
+  showToast('所有数据已重置');
+}
+
+// ============ TOAST ============
+let toastTimer = null;
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show');
+  }, 2000);
+}
+
+// ============ KEYBOARD SHORTCUT ============
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('customModal').classList.contains('open')) {
+      closeCustomModal();
+    } else if (state.selectedId) {
+      state.selectedId = null;
+      renderAll();
+    } else if (state.selectedSlot) {
+      state.selectedSlot = null;
+      renderAll();
+    }
+  }
+});
+
+// Close modal on overlay click
+document.getElementById('customModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('customModal')) {
+    closeCustomModal();
+  }
+});
+
+// ============ INIT ============
+loadState();
+renderAll();
+</script>
+</body>
+</html>

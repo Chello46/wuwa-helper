@@ -1,0 +1,15 @@
+# 鸣潮 · 矩阵叠兵阵容搭配工具
+# 纯静态页面，仅需 index.html，无需依赖
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temp
+*.tmp
